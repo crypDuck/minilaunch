@@ -4,6 +4,10 @@ minilaunch is a shell script that helps automate the minipool creation process f
 
 This script is designed to help avoid FOMO (Fear of Missing Out) and minimize gas costs by waiting for low gas conditions, rather than trying to compete for deposits as quickly as possible. It's particularly useful for node operators who want to optimize their minipool creation process.
 
+## Disclaimer
+
+This script is provided as-is, without any guarantees or warranties of any kind. By using this script, you acknowledge that you do so at your own risk. The authors and contributors of this script are not responsible for any potential losses or damages that may occur from its use.
+
 ## Features
 
 - Monitors Ethereum gas prices
