@@ -6,7 +6,7 @@ This script is designed to help avoid FOMO (Fear of Missing Out) and minimize ga
 
 ## Features
 
-- Monitors Ethereum gas prices in real-time
+- Monitors Ethereum gas prices
 - Executes minipool creation when gas prices are favorable
 - Adjustable gas price threshold that can increase over time
 - Checks contract ETH balance before executing transactions
