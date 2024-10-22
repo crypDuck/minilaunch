@@ -1,6 +1,6 @@
-# MiniLaunch
+# minilaunch
 
-MiniLaunch is a shell script that helps automate the minipool creation process for NodeSet Constellation pools. It monitors Ethereum gas prices and launches minipool creates when the gas price falls below a specified threshold, which can be configured to increase over time. The script also checks the contract's ETH balance before executing transactions.
+minilaunch is a shell script that helps automate the minipool creation process for NodeSet Constellation pools. It monitors Ethereum gas prices and launches minipool creates when the gas price falls below a specified threshold, which can be configured to increase over time. The script also checks the contract's ETH balance before executing transactions.
 
 This script is designed to help avoid FOMO (Fear of Missing Out) and minimize gas costs by waiting for low gas conditions, rather than trying to compete for deposits as quickly as possible. It's particularly useful for node operators who want to optimize their minipool creation process.
 
@@ -16,8 +16,8 @@ This script is designed to help avoid FOMO (Fear of Missing Out) and minimize ga
 
 1. **Clone the repository:**
    ```
-   git clone https://github.com/crypDuck/MiniLaunch.git
-   cd MiniLaunch
+   git clone https://github.com/crypDuck/minilaunch.git
+   cd minilaunch
    ```
 
 2. **Make the script executable:**
