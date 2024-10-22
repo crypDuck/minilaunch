@@ -104,8 +104,9 @@ This will show you all the available command-line options, including:
 - `-e, --endGas`: Set the ending gas limit
 - `-i, --prioFee`: Set the priority fee
 - `--dry-run`: Run in dry-run mode (no transactions will be executed)
+- `--never-exit`: Keep running indefinitely, even after successful minipool creation
 
-Important notes on script behavior:
+The `--never-exit` option allows the script to continue running and attempting to create new minipools even after a successful creation. When this option is not used, the script will exit after successfully creating a minipool or when encountering an unexpected output. The option has no effect when running in dry-run mode.
 
 1. If both `startGas` and `endGas` are specified:
    - The gas limit will gradually increase from `startGas` to `endGas` over the specified `runtime`.
