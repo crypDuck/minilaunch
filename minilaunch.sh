@@ -39,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-22
-# Version: 0.12
+# Version: 0.13
 # ============================================================================
 
 # Load default environment variables
@@ -210,6 +210,13 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+# Print dry-run status
+if [ "$DRY_RUN" = true ]; then
+    echo "Running in DRY RUN mode. No transactions will be executed."
+else
+    echo "Running in LIVE mode. Transactions will be executed when conditions are met."
+fi
+
 # Convert runtime to seconds
 RUNTIME_SECONDS=$((RUNTIME_HOURS * 3600))
 
@@ -282,25 +289,24 @@ while true; do
             if [ "$DRY_RUN" = true ]; then
                 echo "[DRY RUN] Command would be executed here"
                 exit 0
-            else
-                # Execute the command and capture its output
-                OUTPUT=$($COMMAND | sed '/^$/d')
-                echo "$OUTPUT"
+            fi
+            # Execute the command and capture its output
+            OUTPUT=$($COMMAND | sed '/^$/d')
+            echo "$OUTPUT"
 
-                if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
-                    echo "Minipool created successfully."
-                    mark_salt "$SALT"
-                    SALT=$(read_salt)
-                    echo "Going to sleep for 12 hours before continuing..."
-                    sleep 43200  # 12 hours in seconds
-                    START_TIME=$(date +%s)
-                elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
-                    # Conditions not met, continue waiting
-                    :
-                else
-                    echo "Unexpected output. Minipool creation may have failed. Exiting."
-                    exit 1
-                fi
+            if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
+                echo "Minipool created successfully."
+                mark_salt "$SALT"
+                SALT=$(read_salt)
+                echo "Going to sleep for 12 hours before continuing..."
+                sleep 43200  # 12 hours in seconds
+                START_TIME=$(date +%s)
+            elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
+                # Conditions not met, continue waiting
+                :
+            else
+                echo "Unexpected output. Minipool creation may have failed. Exiting."
+                exit 1
             fi
         else
             # Handle cases where balance is less than MIN_POOL_SIZE or there was an error
