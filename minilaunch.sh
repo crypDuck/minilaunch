@@ -39,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-22
-# Version: 0.11
+# Version: 0.12
 # ============================================================================
 
 # Load default environment variables
@@ -109,7 +109,7 @@ get_gas_price() {
 
 # Function to get ETH balance for a contract address from Etherscan API
 get_pool_eth_balance() {
-    local api_endpoint="/api?module=account&action=balance&address=$CONTRACT_ADDRESS&tag=latest&apikey=$API_KEY"
+    local api_endpoint="/api?module=account&action=balance&address=$OPR_DIST_CONTRACT_ADDR&tag=latest&apikey=$API_KEY"
     local response
     local balance
     local ether_balance
@@ -122,6 +122,27 @@ get_pool_eth_balance() {
         echo "$ether_balance"
     else
         echo "-1"
+    fi
+}
+
+has_pool_sufficient_liquidity() {
+    local hex_bond=$(printf "%064x" $BOND_SIZE)
+    
+    local url="$API_URL"
+    url+="/api"
+    url+="?module=proxy"
+    url+="&action=eth_call"
+    url+="&to=$SUPERNODE_ACC_ADDR"
+    url+="&data=0xbb095456000000000000000000000000000000000000000000000000$hex_bond"
+    url+="&tag=latest"
+    url+="&apikey=$API_KEY"
+
+    local result=$(curl -s -G "$url")
+
+    if [[ $result == *"0x0000000000000000000000000000000000000000000000000000000000000001"* ]]; then
+        return 0  # true in bash
+    else
+        return 1  # false in bash
     fi
 }
 
@@ -254,8 +275,8 @@ while true; do
     if (( $(echo "$ADJUSTED_GAS_PRICE <= $GAS_LIMIT" | bc -l) )); then
         POOL_ETH=$(get_pool_eth_balance)
         # Check if balance is a valid number (not an error code like -1) and >= $MIN_POOL_SIZE
-        if (( $(echo "$POOL_ETH >= $MIN_POOL_SIZE" | bc -l) )) && [[ ! "$POOL_ETH" =~ ^- ]]; then
-            echo "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Executing command..."
+        if (( $(echo "$POOL_ETH >= $MIN_POOL_SIZE" | bc -l) )) && [[ ! "$POOL_ETH" =~ ^- ]] && has_pool_sufficient_liquidity; then
+            echo "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Executing command..."
             COMMAND="hyperdrive -f $ADJUSTED_GAS_PRICE -i $PRIO_FEE cs m c -y${SALT:+ -l }$SALT"
             echo "Trying: $COMMAND"
             if [ "$DRY_RUN" = true ]; then
@@ -269,7 +290,7 @@ while true; do
                 if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
                     echo "Minipool created successfully."
                     mark_salt "$SALT"
-                    SALT=$(get_next_salt)
+                    SALT=$(read_salt)
                     echo "Going to sleep for 12 hours before continuing..."
                     sleep 43200  # 12 hours in seconds
                     START_TIME=$(date +%s)
@@ -285,6 +306,8 @@ while true; do
             # Handle cases where balance is less than MIN_POOL_SIZE or there was an error
             if [[ "$POOL_ETH" == "-1" ]]; then
                 echo "$(date "+%Y-%m-%d %H:%M:%S") Failed to retrieve pool balance. Check your internet connection or API key."
+            elif ! has_pool_sufficient_liquidity; then
+                echo "$(date "+%Y-%m-%d %H:%M:%S") The pool does not have sufficient liquidity"
             else
                 echo "$(date "+%Y-%m-%d %H:%M:%S") The pool balance is $POOL_ETH ETH, which is less than $MIN_POOL_SIZE ETH"
             fi
