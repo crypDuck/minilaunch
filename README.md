@@ -53,15 +53,11 @@ This script is provided as-is, without any guarantees or warranties of any kind.
    Note: Using salts is completely optional. If you don't create this file or if the file is empty, the script will function normally without using salts.
 
 4. **Set up environment variables:**
-   - Copy the `.default.env` file to create a new `.env` file:
-     ```
-     cp .default.env .env
-     ```
-   - Edit the `.env` file with your preferred text editor (e.g., nano, vim):
+   - Create a new `.env` file with your preferred text editor (e.g., nano, vim):
      ```
      nano .env
      ```
-   - Set your API key and adjust other variables as needed:
+   - Set your API key and add any other variables you would like to override the defaults with:
      ```
      API_KEY=your_api_key_here
      GAS_LIMIT=4.5
