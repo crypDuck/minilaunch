@@ -155,3 +155,40 @@ When a shell script is run from an SSH session, as soon as the pipe is broken an
 
 8. To watch the log entries continuously as they appear:  
     `tail -f minilaunch.log`
+
+## Configuration Parameters
+
+The following parameters can be configured in the `.default.env` file or rather, overridden in your `.env` file,
+since .default.env is version controlled and should not be modified.
+
+### API Configuration
+- `API_URL`: The base URL for the Etherscan API. Change this if you're using a different network (e.g. testnet).
+- `API_KEY`: Your Etherscan API key. Required for making API calls.
+
+### Gas Price Settings
+- `START_GAS`: The initial gas price (in Gwei) at which the script will start attempting to create minipools.
+- `END_GAS`: The maximum gas price (in Gwei) the script will consider for creating minipools. Used in conjunction with `RUNTIME` for dynamic gas price adjustment.
+- `GAS_MARGIN`: A multiplier applied to the current gas price to determine the adjusted gas price. The adjusted gas price is actually used for all checks, and since the transaction is submitted at the adjusted gas price, this provides a margin that should make reasonably sure the transaction will get included.
+- `PRIO_FEE`: The priority fee (in Gwei) to be used when submitting the minipool create transaction.
+
+### Pool Settings
+- `MIN_POOL_SIZE`: The minimum amount of ETH required in the pool before attempting to create a minipool. Default is 24 ETH. To avoid race conditions where other bots have emptied the pool in the meantime, which would cause the transaction to fail.
+- `BOND_SIZE`: The amount of ETH to be bonded when creating a minipool. Needed as parameter for the hasSufficientLiquidity check.
+
+### Contract Addresses
+- `OPR_DIST_CONTRACT_ADDR`: The address of the Operator Distributor contract.
+- `SUPERNODE_ACC_ADDR`: The address of the Supernode Account contract.
+
+### Script Behavior
+- `SLEEP_NEXT`: The number of seconds to wait between each iteration of the main loop. This interval will be increased to a maximum of 5 minutes if the current gas price is too far above our targeted gas price, to avoid unnecessary checks.
+- `RUNTIME`: The target runtime in hours for a gradual gas limit increase from `START_GAS` to `END_GAS`. The goal of this parameter is to meet the gas price "in the middle" if it doesn't drop to the desired level during the `RUNTIME`. The script will keep running after the `RUNTIME` has passed, using `END_GAS` for the gas limit.
+
+### File Paths
+- `SALT_FILE`: The path to the file containing salt values for minipool creation.
+
+Modifying these parameters will affect the behavior of the script:
+- Adjusting gas settings will impact when transactions are sent.
+- Updating contract addresses is necessary if you're interacting with different contracts.
+- Altering script behavior settings will change how frequently the script checks conditions and how long it runs.
+
+Remember to keep your `.env` file secure and never commit it to version control, as it may contain sensitive information like API keys.
