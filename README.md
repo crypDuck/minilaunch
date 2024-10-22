@@ -15,6 +15,10 @@ This script is provided as-is, without any guarantees or warranties of any kind.
 - Adjustable gas price threshold that can increase over time
 - Checks contract ETH balance before executing transactions
 - Configurable via environment variables
+- Optional use of a list of salts for minipool creation
+  - Allows for unique identification of minipools
+  - Supports multiple minipool creations with different salts
+- Dry-run mode for testing without executing actual transactions
 
 ## Installation and Setup
 
