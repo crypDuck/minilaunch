@@ -29,7 +29,26 @@ This script is provided as-is, without any guarantees or warranties of any kind.
    chmod +x minilaunch.sh
    ```
 
-3. **Set up environment variables:**
+3. **(Optional) Create a salts.txt file:**
+   If you want to use salts for your minipool creations, you can create a file named `salts.txt` in the same directory as the script. This file should contain a list of salts to use, one per line. You can create and edit this file using your favorite text editor. For example:
+
+   ```
+   nano salts.txt
+   ```
+
+   Then add your salts, one per line:
+
+   ```
+   salt1
+   salt2
+   salt3
+   ```
+
+   Replace "salt1", "salt2", etc., with your actual salt values.
+   
+   Note: Using salts is completely optional. If you don't create this file or if the file is empty, the script will function normally without using salts.
+
+4. **Set up environment variables:**
    - Copy the `.default.env` file to create a new `.env` file:
      ```
      cp .default.env .env
@@ -46,14 +65,14 @@ This script is provided as-is, without any guarantees or warranties of any kind.
      # ... other variables ...
      ```
 
-4. **Install required dependencies:**
+5. **Install required dependencies:**
    - Ensure you have `bc` (basic calculator) installed. On most Linux systems, it's pre-installed. If not, you can install it using your package manager:
      ```
      sudo apt-get install bc  # For Debian/Ubuntu
      sudo yum install bc      # For CentOS/RHEL
      ```
 
-5. **Test the script:**
+6. **Test the script:**
    Run the script with the `--dry-run` option to test without executing actual transactions:
    ```
    ./minilaunch.sh --dry-run
