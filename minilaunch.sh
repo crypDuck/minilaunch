@@ -270,10 +270,10 @@ while true; do
                 if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
                     echo "Minipool created successfully."
                     mark_salt "$SALT"
-                    START_TIME=$(date +%s)
                     SALT=$(get_next_salt)
                     echo "Going to sleep for 12 hours before continuing..."
                     sleep 43200  # 12 hours in seconds
+                    START_TIME=$(date +%s)
                 elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
                     # Conditions not met, continue waiting
                 elif [[ "$NEVER_EXIT" != "1" ]]; then
