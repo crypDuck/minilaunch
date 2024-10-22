@@ -230,13 +230,12 @@ while true; do
     # Calculate additional sleep time
     ADD_SLEEP=$PERCENT_OVER_LIMIT
 
-    # Convert percentage to seconds, cap at 5 minutes (300 seconds)
-    if (( $(echo "$ADD_SLEEP > 300" | bc -l) )); then
-        ADD_SLEEP=300
-    fi
-
     # Calculate SLEEP_NEXT as the sum of SLEEP_TIME and additional time, ensuring it's at least SLEEP_TIME
     SLEEP_NEXT=$(echo "$SLEEP_TIME + $ADD_SLEEP" | bc -l | awk '{printf "%.0f", $1}')
+    # Cap at 5 minutes (300 seconds)
+    if (( $(echo "$SLEEP_NEXT > 300" | bc -l) )); then
+        SLEEP_NEXT=300
+    fi
 
     NOW=$(date +%s)
     ELAPSED=$((NOW - START_TIME))
