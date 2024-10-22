@@ -29,6 +29,7 @@
 #   -e, --endGas     Ending gas limit (default: none)
 #   -i, --prioFee    Priority fee (default: 0.08)
 #   --dry-run        Run in dry-run mode (no transactions will be executed)
+#   --never-exit     Keep running indefinitely, even after successful minipool creation
 #
 # Requirements:
 #   - curl
@@ -38,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-22
-# Version: 0.1
+# Version: 0.11
 # ============================================================================
 
 # Load default environment variables
@@ -73,6 +74,7 @@ show_help() {
     echo "  -e, --endGas     Ending gas limit. Default: ${END_GAS:-<none>}."
     echo "  -i, --prioFee    Priority fee. Default: $PRIO_FEE"
     echo "  --dry-run        Run in dry-run mode (no transactions will be executed)"
+    echo "  --never-exit     Keep running indefinitely, even after successful minipool creation"
 }
 
 # Function to sanitize and validate numeric input
@@ -175,6 +177,9 @@ while [[ $# -gt 0 ]]; do
         --dry-run)
             DRY_RUN=true
             ;;
+        --never-exit)
+            NEVER_EXIT=1
+            ;;
         *)
             echo "Unknown parameter passed: $1" >&2
             show_help
@@ -256,16 +261,24 @@ while true; do
             echo "Trying: $COMMAND"
             if [ "$DRY_RUN" = true ]; then
                 echo "[DRY RUN] Command would be executed here"
+                exit 0
             else
                 # Execute the command and capture its output
                 OUTPUT=$($COMMAND | sed '/^$/d')
                 echo "$OUTPUT"
 
-                # Check if the desired string is in the output
-                if [[ ! "$OUTPUT" =~ "Cannot create" ]]; then
-                    echo "The string 'Cannot create' was not found in the output, assuming success."
+                if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
+                    echo "Minipool created successfully."
                     mark_salt "$SALT"
-                    exit 0
+                    START_TIME=$(date +%s)
+                    SALT=$(get_next_salt)
+                    echo "Going to sleep for 12 hours before continuing..."
+                    sleep 43200  # 12 hours in seconds
+                elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
+                    # Conditions not met, continue waiting
+                elif [[ "$NEVER_EXIT" != "1" ]]; then
+                    echo "Unexpected output. Minipool creation may have failed. Exiting."
+                    exit 1
                 fi
             fi
         else
