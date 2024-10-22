@@ -62,7 +62,7 @@ This script is provided as-is, without any guarantees or warranties of any kind.
      API_KEY=your_api_key_here
      GAS_LIMIT=4.5
      PRIO_FEE=0.08
-     # ... other variables ...
+     # ... other variables set in .default.env ...
      ```
 
 5. **Install required dependencies:**
