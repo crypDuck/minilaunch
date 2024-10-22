@@ -109,4 +109,25 @@ To run the script with a static gas limit of 4.5 gwei:
 When a shell script is run from an SSH session, as soon as the pipe is broken and no outputs can be sent to the user, the script stops. In order to let it run even after the SSH session is terminated, follow these steps:
 
 1. Start the job in the background and redirect its output to a file:  
-    `./minilaunch.sh -f 3.1 -e 7 -i 0.11 -r 24 >> ./minilaunch.log 2>&1 &`
+    `./minilaunch.sh -f 3.9 -e 7.1 -i 0.11 -r 17 >> ./minilaunch.log 2>&1 &`
+
+2. You can check the status of background jobs with:  
+    `jobs`
+
+3. If you need to bring it back to the foreground or manipulate it further:  
+    `fg %<job_number>`
+
+4. To kill the job:  
+    `kill %<job_number>`
+
+5. If you want the job to continue running even after you log out, you can `disown` it after starting it:  
+    `disown -h %1  # Replace 1 with the job number if different`
+
+6. Since disowned jobs become regular processes, you can list them using `ps`:  
+    `ps aux | grep minilaunch.sh`
+
+7. If you need to stop a disowned job, you can use its `PID`:  
+    `kill <PID>`
+
+8. To watch the log entries continuously as they appear:  
+    `tail -f minilaunch.log`
