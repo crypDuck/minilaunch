@@ -37,8 +37,8 @@ This script is designed to help avoid FOMO (Fear of Missing Out) and minimize ga
    - Set your API key and adjust other variables as needed:
      ```
      API_KEY=your_api_key_here
-     GAS_LIMIT=30
-     PRIO_FEE=0.1
+     GAS_LIMIT=4.5
+     PRIO_FEE=0.08
      # ... other variables ...
      ```
 
@@ -92,7 +92,7 @@ Important notes on script behavior:
 
 Example usage:
 
-To run the script with a starting gas of 30 gwei, ending gas of 50 gwei, over a 24-hour period, and in dry-run mode:
+To run the script with a starting gas of 3.1 gwei, ending gas of 7 gwei, over a 24-hour period, and in dry-run mode:
 
 ```
 ./minilaunch.sh -f 3.1 -e 7 -r 24 --dry-run
