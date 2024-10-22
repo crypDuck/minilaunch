@@ -276,6 +276,7 @@ while true; do
                     START_TIME=$(date +%s)
                 elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
                     # Conditions not met, continue waiting
+                    :
                 else
                     echo "Unexpected output. Minipool creation may have failed. Exiting."
                     exit 1
