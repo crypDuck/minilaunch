@@ -107,7 +107,7 @@ To display the help section and see all available options:
 
 This will show you all the available command-line options, including:
 
-- `-r, --runtime`: Set the target runtime in hours for gas limit increase
+- `-r, --gasRampTime`: Set the target gas ramp time in hours for gas limit increase
 - `-s, --sleepTime`: Set the time between attempts in seconds
 - `-f, --startGas`: Set the starting gas limit
 - `-e, --endGas`: Set the ending gas limit
@@ -118,18 +118,18 @@ This will show you all the available command-line options, including:
 The `--never-exit` option allows the script to continue running and attempting to create new minipools even after a successful creation, starting with startGas again for the new attempt. When this option is not used, the script will exit after successfully creating a minipool or when encountering an unexpected output. The option has no effect when running in dry-run mode.
 
 1. If both `startGas` and `endGas` are specified:
-   - The gas limit will gradually increase from `startGas` to `endGas` over the specified `runtime`.
-   - After the `runtime` is reached, the script continues to run using the `endGas` value until a transaction can be executed.
+   - The gas limit will gradually increase from `startGas` to `endGas` over the specified `gasRampTime`.
+   - After the `gasRampTime` is reached, the script continues to run using the `endGas` value until a transaction can be executed.
 
 2. If only `startGas` is specified (no `endGas`):
    - The script will use a static gas limit value (`startGas`) throughout its execution.
-   - In this case, the `runtime` parameter has no effect on the gas limit.
+   - In this case, the `gasRampTime` parameter has no effect on the gas limit.
 
 3. The script will continue running indefinitely until a transaction is successfully executed or manually stopped.
 
 Example usage:
 
-To run the script with a starting gas of 3.1 gwei, ending gas of 7 gwei, over a 24-hour period, and in dry-run mode:
+To run the script with a starting gas of 3.1 gwei, ending gas of 7 gwei, over a 24-hour gas ramp time, and in dry-run mode:
 
 ```
 ./minilaunch.sh -f 3.1 -e 7 -r 24 --dry-run
@@ -180,7 +180,7 @@ since .default.env is version controlled and should not be modified.
 
 ### Gas Price Settings
 - `START_GAS`: The initial gas price (in Gwei) at which the script will start attempting to create minipools.
-- `END_GAS`: The maximum gas price (in Gwei) the script will consider for creating minipools. Used in conjunction with `RUNTIME` for dynamic gas price adjustment.
+- `END_GAS`: The maximum gas price (in Gwei) the script will consider for creating minipools. Used in conjunction with `GAS_RAMP_TIME` for dynamic gas price adjustment.
 - `GAS_MARGIN`: A multiplier applied to the current gas price to determine the adjusted gas price. The adjusted gas price is actually used for all checks, and since the transaction is submitted at the adjusted gas price, this provides a margin that should make reasonably sure the transaction will get included.
 - `PRIO_FEE`: The priority fee (in Gwei) to be used when submitting the minipool create transaction.
 
@@ -194,7 +194,7 @@ since .default.env is version controlled and should not be modified.
 
 ### Script Behavior
 - `SLEEP_NEXT`: The number of seconds to wait between each iteration of the main loop. This interval will be increased to a maximum of 5 minutes if the current gas price is too far above our targeted gas price, to avoid unnecessary checks.
-- `RUNTIME`: The target runtime in hours for a gradual gas limit increase from `START_GAS` to `END_GAS`. The goal of this parameter is to meet the gas price "in the middle" if it doesn't drop to the desired level during the `RUNTIME`. The script will keep running after the `RUNTIME` has passed, using `END_GAS` for the gas limit.
+- `GAS_RAMP_TIME`: The target time in hours for a gradual gas limit increase from `START_GAS` to `END_GAS`. The goal of this parameter is to meet the gas price "in the middle" if it doesn't drop to the desired level during the `GAS_RAMP_TIME`. The script will keep running after the `GAS_RAMP_TIME` has passed, using `END_GAS` for the gas limit.
 
 ### File Paths
 - `SALT_FILE`: The path to the file containing salt values for minipool creation.
@@ -205,3 +205,4 @@ Modifying these parameters will affect the behavior of the script:
 - Altering script behavior settings will change how frequently the script checks conditions and how long it runs.
 
 Remember to keep your `.env` file secure and never commit it to version control, as it may contain sensitive information like API keys.
+

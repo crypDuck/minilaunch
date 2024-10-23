@@ -23,7 +23,7 @@
 #
 # Options:
 #   -h, --help       Show this help message and exit
-#   -r, --runtime    Target runtime in hours (default: 24)
+#   -r, --gasRampTime Target gas ramp time in hours. Default: $GAS_RAMP_TIME
 #   -s, --sleepTime  Time between attempts in seconds (default: 5)
 #   -f, --startGas   Starting gas limit (default: 5.1)
 #   -e, --endGas     Ending gas limit (default: none)
@@ -38,8 +38,8 @@
 #   - hyperdrive (custom Ethereum transaction tool)
 #
 # Author: crypDuck
-# Date: 2024-10-22
-# Version: 0.14
+# Date: 2024-10-23
+# Version: 0.15
 # ============================================================================
 
 # Load default environment variables
@@ -68,7 +68,7 @@ show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
     echo "  -h, --help       Show this help message and exit"
-    echo "  -r, --runtime    Target runtime in hours. Default: $RUNTIME_HOURS"
+    echo "  -r, --gasRampTime Target gas ramp time in hours. Default: $GAS_RAMP_TIME"
     echo "  -s, --sleepTime  Time between attempts in seconds. Default: $SLEEP_TIME"
     echo "  -f, --startGas   Starting gas limit. Default: $START_GAS"
     echo "  -e, --endGas     Ending gas limit. Default: ${END_GAS:-<none>}."
@@ -175,8 +175,8 @@ while [[ $# -gt 0 ]]; do
             show_help
             exit 0
             ;;
-        -r|--runtime)
-            RUNTIME_HOURS=$(sanitize_numeric_input "$2" "$RUNTIME_HOURS" "--runtime")
+        -r|--gasRampTime)
+            GAS_RAMP_TIME=$(sanitize_numeric_input "$2" "$GAS_RAMP_TIME" "--gasRampTime")
             shift
             ;;
         -f|--startGas)
@@ -217,8 +217,8 @@ else
     echo "Running in LIVE mode. Transactions will be executed when conditions are met."
 fi
 
-# Convert runtime to seconds
-RUNTIME_SECONDS=$((RUNTIME_HOURS * 3600))
+# Convert gas ramp time to seconds
+GAS_RAMP_TIME_SECONDS=$((GAS_RAMP_TIME * 3600))
 
 # Capture start time
 START_TIME=$(date +%s)
@@ -267,11 +267,11 @@ while true; do
 
     NOW=$(date +%s)
     ELAPSED=$((NOW - START_TIME))
-    FRACTION=$(echo "scale=5; $ELAPSED / $RUNTIME_SECONDS" | bc)
+    FRACTION=$(echo "scale=5; $ELAPSED / $GAS_RAMP_TIME_SECONDS" | bc)
 
     if [ -n "$END_GAS" ]; then
         # If we've passed the target time, use END_GAS
-        if [ $ELAPSED -ge $RUNTIME_SECONDS ]; then
+        if [ $ELAPSED -ge $GAS_RAMP_TIME_SECONDS ]; then
             GAS_LIMIT=$END_GAS
         else
             # Calculate GAS_LIMIT based on elapsed time
@@ -324,3 +324,4 @@ while true; do
         sleep "$SLEEP_NEXT"
     fi
 done
+
