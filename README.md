@@ -203,10 +203,13 @@ since .default.env is version controlled and should not be modified.
 ### File Paths
 - `SALT_FILE`: The path to the file containing salt values for minipool creation.
 
+### Notifications
+- `DISCORD_WEBHOOK`: The Discord webhook URL for sending notifications. If this value is empty, no notifications will be sent. See Discord's documentation on webhooks for more information on how to set this up.
+
 Modifying these parameters will affect the behavior of the script:
 - Adjusting gas settings will impact when transactions are sent.
 - Updating contract addresses is necessary if you're interacting with different contracts.
 - Altering script behavior settings will change how frequently the script checks conditions and how long it runs.
+- Setting up the Discord webhook will enable notifications about important events during script execution.
 
-Remember to keep your `.env` file secure and never commit it to version control, as it may contain sensitive information like API keys.
-
+Remember to keep your `.env` file secure and never commit it to version control, as it may contain sensitive information like API keys and webhook URLs.
