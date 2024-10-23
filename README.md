@@ -71,6 +71,19 @@ This script is provided as-is, without any guarantees or warranties of any kind.
      sudo apt-get install bc  # For Debian/Ubuntu
      sudo yum install bc      # For CentOS/RHEL
      ```
+   - Install `jq`, a lightweight command-line JSON processor:
+     ```
+     sudo apt-get install jq  # For Debian/Ubuntu
+     sudo yum install jq      # For CentOS/RHEL
+     ```
+   - Install `curl`, which is used for making HTTP requests:
+     ```
+     sudo apt-get install curl  # For Debian/Ubuntu
+     sudo yum install curl      # For CentOS/RHEL
+     ```
+   - Ensure you have `sed` installed. It's typically pre-installed on most Linux systems.
+
+   Note: The exact installation commands may vary depending on your specific Linux distribution. If you're using a different package manager, adjust the commands accordingly.
 
 6. **Test the script:**
    Run the script with the `--dry-run` option to test without executing actual transactions:

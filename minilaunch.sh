@@ -39,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-22
-# Version: 0.13
+# Version: 0.14
 # ============================================================================
 
 # Load default environment variables
