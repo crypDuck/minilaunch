@@ -186,6 +186,18 @@ notify_discord() {
     # if DISCORD_WEBHOOK_URL is not set, do nothing
 }
 
+# Function to print a message and send it as notification
+print_and_notify() {
+    local message="$1"
+    local additional_info="$2"
+    echo "$message"
+    if [ -n "$additional_info" ]; then
+        notify_discord "${message}\n${additional_info}"
+    else
+        notify_discord "$message"
+    fi
+}
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -301,13 +313,12 @@ while true; do
         POOL_ETH=$(get_pool_eth_balance)
         # Check if balance is a valid number (not an error code like -1) and >= $MIN_POOL_SIZE
         if (( $(echo "$POOL_ETH >= $MIN_POOL_SIZE" | bc -l) )) && [[ ! "$POOL_ETH" =~ ^- ]] && has_pool_sufficient_liquidity; then
-            echo "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Executing command..."
-            notify_discord "Gas and liquidity conditions are favorable. Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Minipool can be created."
+            print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Executing command..." \
+                "Gas and liquidity conditions are favorable."
             COMMAND="hyperdrive -f $ADJUSTED_GAS_PRICE -i $PRIO_FEE cs m c -y${SALT:+ -l }$SALT"
             echo "Trying: $COMMAND"
             if [ "$DRY_RUN" = true ]; then
-                echo "[DRY RUN] Command would be executed here"
-                notify_discord "DRY RUN: Minipool would be created with command $COMMAND"
+                print_and_notify "[DRY RUN] Command would be executed otherwise." "Command: $COMMAND"
                 exit 0
             fi
             # Execute the command and capture its output
@@ -315,8 +326,7 @@ while true; do
             echo "$OUTPUT"
 
             if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
-                echo "Minipool created successfully."
-                notify_discord "Minipool created successfully with output $OUTPUT"
+                print_and_notify "Minipool created successfully." "Output: $OUTPUT"
                 mark_salt "$SALT"
                 SALT=$(read_salt)
                 echo "Going to sleep for 12 hours before continuing..."
@@ -326,18 +336,17 @@ while true; do
                 # Conditions not met, continue waiting
                 :
             else
-                echo "Unexpected output. Minipool creation may have failed. Exiting."
-                notify_discord "Unexpected output: $OUTPUT. Minipool creation may have failed. Exiting."
+                print_and_notify "Unexpected output. Minipool creation may have failed. Exiting." "Output: $OUTPUT"
                 exit 1
             fi
         else
             # Handle cases where balance is less than MIN_POOL_SIZE or there was an error
             if [[ "$POOL_ETH" == "-1" ]]; then
-                echo "$(date "+%Y-%m-%d %H:%M:%S") Failed to retrieve pool balance. Check your internet connection or API key."
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") Failed to retrieve pool balance. Check your internet connection or API key."
             elif ! has_pool_sufficient_liquidity; then
-                echo "$(date "+%Y-%m-%d %H:%M:%S") The pool does not have sufficient liquidity"
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool does not have sufficient liquidity"
             else
-                echo "$(date "+%Y-%m-%d %H:%M:%S") The pool balance is $POOL_ETH ETH, which is less than $MIN_POOL_SIZE ETH"
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool balance is $POOL_ETH ETH, which is less than $MIN_POOL_SIZE ETH"
             fi
         fi
         sleep "$SLEEP_NEXT"
@@ -346,4 +355,3 @@ while true; do
         sleep "$SLEEP_NEXT"
     fi
 done
-
