@@ -158,7 +158,11 @@ When a shell script is run from an SSH session, as soon as the pipe is broken an
     `kill %<job_number>`
 
 5. If you want the job to continue running even after you log out, you can `disown` it after starting it:  
-    `disown -h %1  # Replace 1 with the job number if different`
+    ```
+     disown -h %1   # If you use bash.
+     disown %1      # If you use zsh.
+                    # Replace 1 with the job number if different in both cases
+    ```
 
 6. Since disowned jobs become regular processes, you can list them using `ps`:  
     `ps aux | grep minilaunch.sh`
