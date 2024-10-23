@@ -168,6 +168,24 @@ mark_salt() {
     echo "Marked salt $salt as used in $SALT_FILE"
 }
 
+# Function to send a notification to a Discord webhook
+notify_discord() {
+    # send notification if DISCORD_WEBHOOK_URL is set
+    if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
+        echo "Sending Discord notification..."
+        local message="$1"
+        local url="$DISCORD_WEBHOOK_URL"
+        local payload='{"content":"'"$message"'"}'
+        local http_status=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" -d "$payload" "$url")
+        if [[ $http_status -eq 204 ]]; then
+            echo "Discord notification sent successfully."
+        else
+            echo "Failed to send Discord notification. HTTP status code: $http_status"
+        fi
+    fi
+    # if DISCORD_WEBHOOK_URL is not set, do nothing
+}
+
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -284,10 +302,12 @@ while true; do
         # Check if balance is a valid number (not an error code like -1) and >= $MIN_POOL_SIZE
         if (( $(echo "$POOL_ETH >= $MIN_POOL_SIZE" | bc -l) )) && [[ ! "$POOL_ETH" =~ ^- ]] && has_pool_sufficient_liquidity; then
             echo "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Executing command..."
+            notify_discord "Gas and liquidity conditions are favorable. Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Minipool can be created."
             COMMAND="hyperdrive -f $ADJUSTED_GAS_PRICE -i $PRIO_FEE cs m c -y${SALT:+ -l }$SALT"
             echo "Trying: $COMMAND"
             if [ "$DRY_RUN" = true ]; then
                 echo "[DRY RUN] Command would be executed here"
+                notify_discord "DRY RUN: Minipool would be created with command $COMMAND"
                 exit 0
             fi
             # Execute the command and capture its output
@@ -296,6 +316,7 @@ while true; do
 
             if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
                 echo "Minipool created successfully."
+                notify_discord "Minipool created successfully with output $OUTPUT"
                 mark_salt "$SALT"
                 SALT=$(read_salt)
                 echo "Going to sleep for 12 hours before continuing..."
@@ -306,6 +327,7 @@ while true; do
                 :
             else
                 echo "Unexpected output. Minipool creation may have failed. Exiting."
+                notify_discord "Unexpected output: $OUTPUT. Minipool creation may have failed. Exiting."
                 exit 1
             fi
         else
