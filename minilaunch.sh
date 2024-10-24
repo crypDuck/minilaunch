@@ -170,11 +170,11 @@ mark_salt() {
 
 # Function to send a notification to a Discord webhook
 notify_discord() {
-    # send notification if DISCORD_WEBHOOK_URL is set
-    if [[ -n "$DISCORD_WEBHOOK_URL" ]]; then
+    # send notification if DISCORD_WEBHOOK is set
+    if [[ -n "$DISCORD_WEBHOOK" ]]; then
         echo "Sending Discord notification..."
         local message="$1"
-        local url="$DISCORD_WEBHOOK_URL"
+        local url="$DISCORD_WEBHOOK"
         local payload='{"content":"'"$message"'"}'
         local http_status=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" -d "$payload" "$url")
         if [[ $http_status -eq 204 ]]; then
@@ -183,7 +183,7 @@ notify_discord() {
             echo "Failed to send Discord notification. HTTP status code: $http_status"
         fi
     fi
-    # if DISCORD_WEBHOOK_URL is not set, do nothing
+    # if env var DISCORD_WEBHOOK is not set, do nothing
 }
 
 # Function to print a message and send it as notification
