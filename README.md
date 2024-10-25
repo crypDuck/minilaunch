@@ -57,13 +57,20 @@ This script is provided as-is, without any guarantees or warranties of any kind.
      ```
      nano .env
      ```
-   - Set your etherscan API key and add any other variables you would like to override the defaults with:
+   - Set your Etherscan API key and add any other variables you would like to override the defaults with:
      ```
      API_KEY=your_api_key_here
      START_GAS=4.5
      PRIO_FEE=0.08
      # ... other variables set in .default.env ...
      ```
+
+   To obtain an Etherscan API key:
+   1. Go to https://etherscan.io/
+   2. Sign up for an account if you don't have one
+   3. Once logged in, navigate to your user profile and select "API Keys"
+   4. Click on "Add" to create a new API key
+   5. Copy the generated API key and paste it into your `.env` file
 
 5. **Install required dependencies:**
    - Ensure you have `bc` (basic calculator) installed. On most Linux systems, it's pre-installed. If not, you can install it using your package manager:
