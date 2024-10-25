@@ -57,10 +57,10 @@ This script is provided as-is, without any guarantees or warranties of any kind.
      ```
      nano .env
      ```
-   - Set your API key and add any other variables you would like to override the defaults with:
+   - Set your etherscan API key and add any other variables you would like to override the defaults with:
      ```
      API_KEY=your_api_key_here
-     GAS_LIMIT=4.5
+     START_GAS=4.5
      PRIO_FEE=0.08
      # ... other variables set in .default.env ...
      ```
