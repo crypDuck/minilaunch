@@ -271,33 +271,29 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
-# Print dry-run status
-if [ "$DRY_RUN" = true ]; then
-    print_and_notify 3 "Running in DRY RUN mode. No transactions will be executed."
-else
-    print_and_notify 3 "Running in LIVE mode. Transactions will be executed when conditions are met."
-fi
-
 # Convert gas ramp time to seconds
 GAS_RAMP_TIME_SECONDS=$((GAS_RAMP_TIME * 3600))
 
 # Capture start time
 START_TIME=$(date +%s)
 
+# Error checks
 if [ -n "$END_GAS" ] && [ $(echo "$END_GAS < $START_GAS" | bc -l) -eq 1 ]; then
     echo "Error: endGas must be greater than or equal to startGas." >&2
     exit 1
 fi
-# Error checks
-print_and_notify 1 "$(date "+%Y-%m-%d %H:%M:%S") minilaunch started with startGas: $START_GAS, endGas: $END_GAS, rampTime: $GAS_RAMP_TIME hours"
 
 # Read salt
 SALT="$(read_salt)"
-if [ -z "$SALT" ]; then
-    print_and_notify 3 "Not using salt"
+
+# Determine the mode
+if [ "$DRY_RUN" = true ]; then
+    MODE="DRY RUN"
 else
-    print_and_notify 3 "Using salt $SALT"
+    MODE="LIVE"
 fi
+
+print_and_notify 1 "$(date "+%Y-%m-%d %H:%M:%S") minilaunch started in $MODE mode with startGas: $START_GAS, endGas: $END_GAS, rampTime: $GAS_RAMP_TIME hours, salt: ${SALT:-<none>}."
 
 GAS_LIMIT=$START_GAS
 
