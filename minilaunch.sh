@@ -30,6 +30,7 @@
 #   -i, --prioFee    Priority fee (default: 0.08)
 #   --dry-run        Run in dry-run mode (no transactions will be executed)
 #   --never-exit     Keep running indefinitely, even after successful minipool creation
+#   --debug          Enable debug mode (for notifications)
 #
 # Requirements:
 #   - curl
@@ -62,6 +63,7 @@ if [[ -z "$API_KEY" ]]; then
 fi
 
 DRY_RUN=false
+DEBUG_MODE=false
 
 # Function to display help
 show_help() {
@@ -75,6 +77,7 @@ show_help() {
     echo "  -i, --prioFee    Priority fee. Default: $PRIO_FEE"
     echo "  --dry-run        Run in dry-run mode (no transactions will be executed)"
     echo "  --never-exit     Keep running indefinitely, even after successful minipool creation"
+    echo "  --debug          Enable debug mode"
 }
 
 # Function to sanitize and validate numeric input
@@ -170,36 +173,36 @@ mark_salt() {
 
 # Function to send a notification to a Discord webhook
 notify_discord() {
-    # send notification if DISCORD_WEBHOOK is set
     if [[ -n "$DISCORD_WEBHOOK" ]]; then
-        echo "Sending Discord notification..."
         local message="$1"
         local url="$DISCORD_WEBHOOK"
         local payload='{"content":"'"$message"'"}'
         local http_status=$(curl -s -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" -d "$payload" "$url")
-        if [[ $http_status -eq 204 ]]; then
-            echo "Discord notification sent successfully."
-        else
-            echo "Failed to send Discord notification. HTTP status code: $http_status"
+        if [ "$DEBUG_MODE" = true ]; then
+            if [[ $http_status -eq 204 ]]; then
+                echo "Discord notification sent successfully."
+            else
+                echo "Failed to send Discord notification. HTTP status code: $http_status"
+            fi
         fi
     fi
-    # if env var DISCORD_WEBHOOK is not set, do nothing
 }
 
 # Function to send a notification to a Telegram bot
 notify_telegram() {
     if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
-        echo "Sending Telegram notification..."
         local message="$1"
         local header='<pre style="background-color: #f0f0f0; color: #333; padding: 10px; border-left: 5px solid #007bff; font-weight: bold;">🚀 MiniLaunch Notification</pre>'
         local full_message="${header}${message}"
         local url="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
         local params="chat_id=${TELEGRAM_CHAT_ID}&text=$(echo "${full_message}" | jq -sRr @uri)&parse_mode=HTML"
         local response=$(curl -s -X POST "${url}" -d "${params}")
-        if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
-            echo "Telegram notification sent successfully."
-        else
-            echo "Failed to send Telegram notification. Error: $(echo "$response" | jq -r '.description')"
+        if [ "$DEBUG_MODE" = true ]; then
+            if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
+                echo "Telegram notification sent successfully."
+            else
+                echo "Failed to send Telegram notification. Error: $(echo "$response" | jq -r '.description')"
+            fi
         fi
     fi
 }
@@ -255,6 +258,9 @@ while [[ $# -gt 0 ]]; do
             ;;
         --never-exit)
             NEVER_EXIT=1
+            ;;
+        --debug)
+            DEBUG_MODE=true
             ;;
         *)
             echo "Unknown parameter passed: $1" >&2
