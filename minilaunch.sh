@@ -267,9 +267,9 @@ done
 
 # Print dry-run status
 if [ "$DRY_RUN" = true ]; then
-    echo "Running in DRY RUN mode. No transactions will be executed."
+    print_and_notify 3 "Running in DRY RUN mode. No transactions will be executed."
 else
-    echo "Running in LIVE mode. Transactions will be executed when conditions are met."
+    print_and_notify 3 "Running in LIVE mode. Transactions will be executed when conditions are met."
 fi
 
 # Convert gas ramp time to seconds
@@ -288,9 +288,9 @@ print_and_notify 1 "$(date "+%Y-%m-%d %H:%M:%S") minilaunch started with startGa
 # Read salt
 SALT="$(read_salt)"
 if [ -z "$SALT" ]; then
-    echo "Not using salt"
+    print_and_notify 3 "Not using salt"
 else
-    echo "Using salt $SALT"
+    print_and_notify 3 "Using salt $SALT"
 fi
 
 GAS_LIMIT=$START_GAS
@@ -355,10 +355,11 @@ while true; do
                 if [[ "$NEVER_EXIT" -eq 1 ]]; then
                     mark_salt "$SALT"
                     SALT=$(read_salt)
-                    echo "Going to sleep for 12 hours before continuing..."
+                    print_and_notify 1 "Going to sleep for 12 hours before continuing..."
                     sleep 43200  # 12 hours in seconds
                     START_TIME=$(date +%s)
                 else
+                    print_and_notify 1 "Exiting."
                     exit 0
                 fi
             elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
@@ -380,7 +381,7 @@ while true; do
         fi
         sleep "$SLEEP_NEXT"
     else
-        echo "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price is $ADJUSTED_GAS_PRICE gwei, which is higher than $GAS_LIMIT. Waiting for $SLEEP_NEXT seconds..."
+        print_and_notify 3 "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price is $ADJUSTED_GAS_PRICE gwei, which is higher than $GAS_LIMIT. Waiting for $SLEEP_NEXT seconds..."
         sleep "$SLEEP_NEXT"
     fi
 done
