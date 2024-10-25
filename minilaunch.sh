@@ -38,8 +38,8 @@
 #   - hyperdrive (custom Ethereum transaction tool)
 #
 # Author: crypDuck
-# Date: 2024-10-23
-# Version: 0.15
+# Date: 2024-10-25
+# Version: 0.16
 # ============================================================================
 
 # Load default environment variables
@@ -327,11 +327,15 @@ while true; do
 
             if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
                 print_and_notify "Minipool created successfully." "Output: $OUTPUT"
-                mark_salt "$SALT"
-                SALT=$(read_salt)
-                echo "Going to sleep for 12 hours before continuing..."
-                sleep 43200  # 12 hours in seconds
-                START_TIME=$(date +%s)
+                if [[ "$NEVER_EXIT" -eq 1 ]]; then
+                    mark_salt "$SALT"
+                    SALT=$(read_salt)
+                    echo "Going to sleep for 12 hours before continuing..."
+                    sleep 43200  # 12 hours in seconds
+                    START_TIME=$(date +%s)
+                else
+                    exit 0
+                fi
             elif [[ "$OUTPUT" =~ "Cannot create" ]]; then
                 # Conditions not met, continue waiting
                 :
