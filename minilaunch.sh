@@ -39,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-25
-# Version: 0.17
+# Version: 0.18
 # ============================================================================
 
 # Load default environment variables
@@ -208,13 +208,18 @@ notify_telegram() {
 print_and_notify() {
     local message="$1"
     local additional_info="$2"
+    local urgency_level="$3"
+
     echo "$message"
-    if [ -n "$additional_info" ]; then
-        notify_discord "${message}\n${additional_info}"
-        notify_telegram "${message}\n${additional_info}"
-    else
-        notify_discord "$message"
-        notify_telegram "$message"
+    
+    if [ "$urgency_level" -le "$NOTIFICATION_LVL" ]; then
+        if [ -n "$additional_info" ]; then
+            notify_discord "${message}\n${additional_info}"
+            notify_telegram "${message}\n${additional_info}"
+        else
+            notify_discord "$message"
+            notify_telegram "$message"
+        fi
     fi
 }
 
@@ -334,11 +339,11 @@ while true; do
         # Check if balance is a valid number (not an error code like -1) and >= $MIN_POOL_SIZE
         if (( $(echo "$POOL_ETH >= $MIN_POOL_SIZE" | bc -l) )) && [[ ! "$POOL_ETH" =~ ^- ]] && has_pool_sufficient_liquidity; then
             print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") Adjusted gas price ($ADJUSTED_GAS_PRICE) is less than or equal to $GAS_LIMIT gwei and there is $POOL_ETH ETH in the pool. Pool has sufficient liquidity. Executing command..." \
-                "Gas and liquidity conditions are favorable."
+                "Gas and liquidity conditions are favorable." 3
             COMMAND="hyperdrive -f $ADJUSTED_GAS_PRICE -i $PRIO_FEE cs m c -y${SALT:+ -l }$SALT"
-            echo "Trying: $COMMAND"
+            print_and_notify "Trying minipool creation: $COMMAND" 1
             if [ "$DRY_RUN" = true ]; then
-                print_and_notify "[DRY RUN] Command would be executed otherwise." "Command: $COMMAND"
+                echo "[DRY RUN] Command would be executed otherwise."
                 exit 0
             fi
             # Execute the command and capture its output
@@ -346,7 +351,7 @@ while true; do
             echo "$OUTPUT"
 
             if [[ "$OUTPUT" =~ "Minipool created successfully" ]]; then
-                print_and_notify "Minipool created successfully." "Output: $OUTPUT"
+                print_and_notify "Minipool created successfully." "Output: $OUTPUT" 1
                 if [[ "$NEVER_EXIT" -eq 1 ]]; then
                     mark_salt "$SALT"
                     SALT=$(read_salt)
@@ -360,17 +365,17 @@ while true; do
                 # Conditions not met, continue waiting
                 :
             else
-                print_and_notify "Unexpected output. Minipool creation may have failed. Exiting." "Output: $OUTPUT"
+                print_and_notify "Unexpected output. Minipool creation may have failed. Exiting." "Output: $OUTPUT" 1
                 exit 1
             fi
         else
             # Handle cases where balance is less than MIN_POOL_SIZE or there was an error
             if [[ "$POOL_ETH" == "-1" ]]; then
-                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") Failed to retrieve pool balance. Check your internet connection or API key."
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") Failed to retrieve pool balance. Check your internet connection or API key." "" 2
             elif ! has_pool_sufficient_liquidity; then
-                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool does not have sufficient liquidity"
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool does not have sufficient liquidity" "" 2
             else
-                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool balance is $POOL_ETH ETH, which is less than $MIN_POOL_SIZE ETH"
+                print_and_notify "$(date "+%Y-%m-%d %H:%M:%S") The pool balance is $POOL_ETH ETH, which is less than $MIN_POOL_SIZE ETH" "" 2
             fi
         fi
         sleep "$SLEEP_NEXT"
