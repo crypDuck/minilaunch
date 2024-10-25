@@ -213,7 +213,9 @@ since .default.env is version controlled and should not be modified.
 - `SALT_FILE`: The path to the file containing salt values for minipool creation.
 
 ### Notifications
-- `DISCORD_WEBHOOK`: The Discord webhook URL for sending notifications. If this value is empty, no notifications will be sent. See Discord's documentation on webhooks for more information on how to set this up.
+- `DISCORD_WEBHOOK`: The Discord webhook URL for sending notifications. If this value is empty, no Discord notifications will be sent. See Discord's documentation on webhooks for more information on how to set this up.
+- `TELEGRAM_BOT_TOKEN`: The token for your Telegram bot. If this value is empty, no Telegram notifications will be sent.
+- `TELEGRAM_CHAT_ID`: The chat ID where you want to receive Telegram notifications. This can be your personal chat ID or a group chat ID.
 
 Modifying these parameters will affect the behavior of the script:
 - Adjusting gas settings will impact when transactions are sent.
@@ -222,3 +224,29 @@ Modifying these parameters will affect the behavior of the script:
 - Setting up the Discord webhook will enable notifications about important events during script execution.
 
 Remember to keep your `.env` file secure and never commit it to version control, as it may contain sensitive information like API keys and webhook URLs.
+
+## Setting up Telegram Notifications
+
+To receive notifications via Telegram, you need to create a Telegram bot and obtain your chat ID. Follow these steps:
+
+1. **Create a Telegram Bot:**
+   - Open Telegram and search for the "BotFather" bot.
+   - Start a chat with BotFather and send the command `/newbot`.
+   - Follow the prompts to choose a name and username for your bot.
+   - Once created, BotFather will provide you with a token. This is your `TELEGRAM_BOT_TOKEN`.
+
+2. **Get Your Chat ID:**
+   - Start a chat with @userinfobot on Telegram.
+   - Send a message to @userinfobot. It will reply with your user information, including your ID.
+   - This ID is your `TELEGRAM_CHAT_ID`. It should be a number, typically 9 or 10 digits long.
+
+3. **Configure Your `.env` File:**
+   - Add the following lines to your `.env` file:
+     ```
+     TELEGRAM_BOT_TOKEN=your_bot_token_here
+     TELEGRAM_CHAT_ID=your_chat_id_here
+     ```
+
+Now, when you run the script, it will send notifications to both Discord (if configured) and Telegram.
+
+Remember to keep your bot token and chat ID private and never share them publicly.

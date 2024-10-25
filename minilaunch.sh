@@ -39,7 +39,7 @@
 #
 # Author: crypDuck
 # Date: 2024-10-25
-# Version: 0.16
+# Version: 0.17
 # ============================================================================
 
 # Load default environment variables
@@ -186,6 +186,24 @@ notify_discord() {
     # if env var DISCORD_WEBHOOK is not set, do nothing
 }
 
+# Function to send a notification to a Telegram bot
+notify_telegram() {
+    if [[ -n "$TELEGRAM_BOT_TOKEN" && -n "$TELEGRAM_CHAT_ID" ]]; then
+        echo "Sending Telegram notification..."
+        local message="$1"
+        local header='<pre style="background-color: #f0f0f0; color: #333; padding: 10px; border-left: 5px solid #007bff; font-weight: bold;">🚀 MiniLaunch Notification</pre>'
+        local full_message="${header}${message}"
+        local url="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"
+        local params="chat_id=${TELEGRAM_CHAT_ID}&text=$(echo "${full_message}" | jq -sRr @uri)&parse_mode=HTML"
+        local response=$(curl -s -X POST "${url}" -d "${params}")
+        if [[ $(echo "$response" | jq -r '.ok') == "true" ]]; then
+            echo "Telegram notification sent successfully."
+        else
+            echo "Failed to send Telegram notification. Error: $(echo "$response" | jq -r '.description')"
+        fi
+    fi
+}
+
 # Function to print a message and send it as notification
 print_and_notify() {
     local message="$1"
@@ -193,8 +211,10 @@ print_and_notify() {
     echo "$message"
     if [ -n "$additional_info" ]; then
         notify_discord "${message}\n${additional_info}"
+        notify_telegram "${message}\n${additional_info}"
     else
         notify_discord "$message"
+        notify_telegram "$message"
     fi
 }
 
@@ -253,12 +273,12 @@ GAS_RAMP_TIME_SECONDS=$((GAS_RAMP_TIME * 3600))
 # Capture start time
 START_TIME=$(date +%s)
 
-# Error checks
-echo "startGas: $START_GAS, endGas: $END_GAS"
 if [ -n "$END_GAS" ] && [ $(echo "$END_GAS < $START_GAS" | bc -l) -eq 1 ]; then
     echo "Error: endGas must be greater than or equal to startGas." >&2
     exit 1
 fi
+# Error checks
+echo "$(date "+%Y-%m-%d %H:%M:%S") minilaunch started with startGas: $START_GAS, endGas: $END_GAS, rampTime: $GAS_RAMP_TIME hours"
 
 # Read salt
 SALT="$(read_salt)"
