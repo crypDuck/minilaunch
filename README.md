@@ -70,8 +70,10 @@ This script is provided as-is, without any guarantees or warranties of any kind.
    2. Sign up for an account if you don't have one
    3. Once logged in, navigate to your user profile and select "API Keys"
    4. Click on "Add" to create a new API key
-   5. Copy the generated API key and paste it into your `.env` file
-
+   5. Copy the generated API key and paste it into your `.env` file on a single line that reads
+   ```
+   API_KEY=<your_api_key_here>
+   ```
 5. **Install required dependencies:**
    - Ensure you have `bc` (basic calculator) installed. On most Linux systems, it's pre-installed. If not, you can install it using your package manager:
      ```
